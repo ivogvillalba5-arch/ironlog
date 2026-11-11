@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d10">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IronLog">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>IronLog</title>
+<style>
+:root{--bg:#0a0d10;--s1:#12171c;--s2:#1a2128;--bd:#232c34;--tx:#e8eef2;--mu:#8593a0;--g:#39ff88;--b:#3aa0ff;--r:14px;--nav:64px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:env(safe-area-inset-top) 0 calc(var(--nav) + env(safe-area-inset-bottom) + 70px)}
+main{max-width:560px;margin:0 auto;padding:14px}
+section{display:none}section.on{display:block}
+h1{font-size:22px;font-weight:800;margin:6px 0 2px;letter-spacing:-.01em}
+h2{font-size:17px;margin:0 0 10px}
+.sub{color:var(--mu);margin:0 0 14px;font-size:13px}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.days{display:flex;gap:8px;margin-bottom:14px}
+.days button{flex:1;padding:10px 0;border-radius:12px;border:1px solid var(--bd);background:var(--s1);color:var(--mu);font-weight:700;font-size:14px}
+.days button.on{background:var(--g);color:#031a0d;border-color:var(--g)}
+.ex h3{margin:0;font-size:16px}
+.tg{color:var(--b);font-weight:700;font-size:13px;margin:2px 0}
+.note{color:var(--mu);font-size:13px;margin:2px 0 8px}
+.prev{font-size:12.5px;color:var(--mu);background:var(--s2);border-radius:8px;padding:6px 9px;margin-bottom:8px}
+.prev b{color:var(--tx);font-weight:600}
+.set{display:grid;grid-template-columns:26px 1fr 1fr 44px;gap:8px;align-items:center;margin-bottom:6px}
+.set .n{color:var(--mu);text-align:center;font-weight:700}
+input,select{width:100%;background:var(--s2);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:11px 10px;font:inherit;font-size:16px;min-width:0}
+input:focus,select:focus{outline:2px solid var(--b);outline-offset:0}
+.set .ok{height:42px;border-radius:10px;border:1px solid var(--bd);background:var(--s2);color:var(--mu);font-size:18px}
+.set.done .ok{background:var(--g);color:#031a0d;border-color:var(--g)}
+.set.done input{border-color:rgba(57,255,136,.45)}
+.lbl{font-size:11.5px;color:var(--mu);margin:0 0 3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.chip{padding:7px 12px;border-radius:999px;border:1px solid var(--b);background:transparent;color:var(--b);font-weight:700;font-size:13px}
+.chip:active{background:var(--b);color:#02121f}
+.btn{padding:12px 16px;border-radius:12px;border:0;background:var(--g);color:#031a0d;font-weight:800;font-size:15px;width:100%}
+.btn.alt{background:transparent;border:1px solid var(--b);color:var(--b)}
+.btn.dng{background:transparent;border:1px solid #ff5470;color:#ff5470}
+.btn.sm{width:auto;padding:8px 12px;font-size:13px}
+.ghost{background:none;border:0;color:var(--mu);font-size:13px;padding:6px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:14px}
+.row:last-child{border:0}
+.row small{color:var(--mu)}
+.x{background:none;border:0;color:#ff5470;font-size:18px;padding:0 6px}
+canvas{max-height:260px}
+.bar{display:flex;align-items:center;gap:3px;height:70px;margin:12px 0}
+.bar .sh{height:8px;width:18px;background:#556;border-radius:2px}
+.bar .pl{border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#031a0d;width:22px}
+.sw{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.sw input{width:22px;height:22px;accent-color:var(--g)}
+#timer{position:fixed;left:8px;right:8px;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 8px);max-width:544px;margin:auto;background:var(--s2);border:1px solid var(--bd);border-radius:16px;padding:8px 10px;display:flex;align-items:center;gap:8px;z-index:20;box-shadow:0 6px 24px #000a}
+#timer.run{border-color:var(--g)}
+#timer.end{border-color:#ff5470;animation:bl .5s 6}
+@keyframes bl{50%{background:#3a1520}}
+#tm{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;min-width:68px;color:var(--g)}
+#timer .chip{padding:6px 9px;font-size:12px}
+nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#0d1115;border-top:1px solid var(--bd);display:flex;z-index:30}
+nav button{flex:1;background:none;border:0;color:var(--mu);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+nav button span{font-size:20px;line-height:1}
+nav button.on{color:var(--g)}
+#toast{position:fixed;top:calc(env(safe-area-inset-top) + 10px);left:50%;transform:translateX(-50%);background:var(--g);color:#031a0d;padding:9px 16px;border-radius:999px;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#timer.end{animation:none}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<main>
+<section id="t-rutina" class="on">
+  <h1 id="dayT"></h1><p class="sub" id="dayS"></p>
+  <div class="days" id="days"></div>
+  <div id="exs"></div>
+  <button class="btn" id="saveAll">Guardar todas las series completadas</button>
+</section>
+
+<section id="t-medidas">
+  <h1>Medidas corporales</h1><p class="sub">Registra tu progreso de recomposición.</p>
+  <div class="card">
+    <div class="grid2">
+      <div><p class="lbl">Fecha</p><input type="date" id="mDate"></div>
+      <div><p class="lbl">Peso corporal (<span class="u"></span>)</p><input id="mP" inputmode="decimal" placeholder="0.0"></div>
+      <div><p class="lbl">Cintura (cm)</p><input id="mC" inputmode="decimal" placeholder="0.0"></div>
+      <div><p class="lbl">Panza (cm)</p><input id="mB" inputmode="decimal" placeholder="0.0"></div>
+      <div><p class="lbl">Muslos (cm)</p><input id="mM" inputmode="decimal" placeholder="0.0"></div>
+    </div>
+    <div style="height:12px"></div><button class="btn" id="mSave">Guardar medidas</button>
+  </div>
+  <div class="card"><h2>Historial</h2><div id="mList"></div></div>
+</section>
+
+<section id="t-progreso">
+  <h1>Progreso</h1><p class="sub">Tu curva de fuerza y de cuerpo.</p>
+  <div class="card"><h2>Fuerza por ejercicio</h2><select id="pEx"></select>
+    <div style="height:10px"></div><canvas id="cS"></canvas><p class="sub" style="margin:8px 0 0">Verde: 1RM estimado (Epley). Azul: peso máximo de la sesión.</p></div>
+  <div class="card"><h2>Medidas</h2><select id="pM"><option value="p">Peso corporal</option><option value="c">Cintura</option><option value="b">Panza</option><option value="m">Muslos</option></select>
+    <div style="height:10px"></div><canvas id="cM"></canvas></div>
+  <p class="sub" id="chartMsg"></p>
+</section>
+
+<section id="t-discos">
+  <h1>Calculadora de discos</h1><p class="sub">Discos por lado según tu inventario.</p>
+  <div class="card">
+    <div class="grid2">
+      <div><p class="lbl">Peso objetivo (<span class="u"></span>)</p><input id="dT" inputmode="decimal" placeholder="100"></div>
+      <div><p class="lbl">Peso de la barra (<span class="u"></span>)</p><input id="dB" inputmode="decimal"></div>
+    </div>
+    <div style="height:12px"></div><button class="btn" id="dGo">Calcular</button>
+    <div id="dOut"></div>
+  </div>
+  <div class="card"><h2>Mi inventario (discos totales)</h2><p class="sub">Cantidad total de discos de cada tamaño; se usan en pares.</p><div id="inv" class="grid2"></div></div>
+</section>
+
+<section id="t-ajustes">
+  <h1>Configuración</h1><p class="sub">Todo se guarda solo en este teléfono.</p>
+  <div class="card">
+    <p class="lbl">Unidad de peso</p>
+    <select id="sU"><option value="kg">Kilogramos (kg)</option><option value="lb">Libras (lb)</option></select>
+    <label class="sw"><span>Iniciar descanso al guardar una serie</span><input type="checkbox" id="sAuto"></label>
+  </div>
+  <div class="card"><h2>Copia de seguridad</h2>
+    <button class="btn" id="exp">Exportar historial (.json)</button><div style="height:10px"></div>
+    <button class="btn alt" id="impB">Importar historial (.json)</button>
+    <input type="file" id="imp" accept=".json,application/json" hidden>
+    <div style="height:10px"></div><button class="btn dng" id="rst">Borrar todos los datos</button>
+  </div>
+</section>
+</main>
+
+<div id="timer"><div id="tm">0:00</div>
+  <button class="chip" data-t="60">60s</button><button class="chip" data-t="90">90s</button><button class="chip" data-t="120">2m</button><button class="chip" data-t="180">3m</button>
+  <button class="chip" id="tStop" style="margin-left:auto;border-color:#ff5470;color:#ff5470">Parar</button></div>
+
+<nav id="nav">
+  <button data-tab="rutina" class="on"><span>🏋️</span>Rutina</button>
+  <button data-tab="medidas"><span>📏</span>Medidas</button>
+  <button data-tab="progreso"><span>📈</span>Progreso</button>
+  <button data-tab="discos"><span>⚙️</span>Discos</button>
+  <button data-tab="ajustes"><span>💾</span>Ajustes</button>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+/* ---------- DATOS ---------- */
+const E=(n,s,tg,r,note)=>({n,s,tg,r,note});
+const DAYS=[
+{id:'d1',dow:'Lunes',t:'Tren superior · Empuje',ex:[
+ E('Flexiones de Brazo',3,'3-4 series × 8-10 reps',90,'Pausa de 1 seg abajo o pies elevados.'),
+ E('Press Militar con Barra',3,'3 series × 8-10 reps',120,'Controlar bajada sin arquear la espalda.'),
+ E('Aperturas con Mancuernas',3,'3 series × 8-10 reps',90,'Tempo lento (3-4s bajada + 1s pausa abajo).'),
+ E('Elevaciones Laterales',3,'3 series × 12-15 reps',60,'Subida controlada sin balanceo.'),
+ E('Extensiones de Tríceps con Banda',2,'2-3 series al fallo',60,'Codos pegados al cuerpo.')]},
+{id:'d2',dow:'Martes',t:'Tren inferior · Cuádriceps y base',ex:[
+ E('Sentadilla Zercher con Barra',4,'4 series × 6-8 reps',180,'Barra en el pliegue de codos; levantar desde el suelo.'),
+ E('Sentadilla Búlgara con Mancuernas',3,'3 series × 8-10 reps/pierna',90,'Pausa de 2 seg abajo por repetición.'),
+ E('Peso Muerto Rumano con Barra',3,'3 series × 8-10 reps',90,'Excéntrica de 3s bajando; máxima extensión.'),
+ E('Elevaciones de Talones (Pantorrillas)',3,'3 series × 15-20 reps',60,'Aguantar 1s en contracción pico.'),
+ E('Plancha Frontal Isométrica',3,'3 series × 30-45 seg (anota los segundos en Reps)',60,'Anti-extensión. Aplanar zona lumbar, apretar glúteos y abdomen.')]},
+{id:'d3',dow:'Jueves',t:'Tren superior · Tracción',ex:[
+ E('Remo con Barra (Pronado)',4,'4 series × 6-8 reps',120,'Torso inclinado 45°, barra al abdomen bajo.'),
+ E('Remo con Mancuerna a Una Mano',3,'3 series × 8-10 reps/lado',90,'Apoyo firme, tracción hacia la cadera.'),
+ E('Jalones para Dorsales con Banda',3,'3 series × 12-15 reps',90,'Agarre acortado/banda doblada.'),
+ E('Pájaros con Mancuernas',3,'3 series × 12-15 reps',60,'Deltoides posterior.'),
+ E('Curl de Bíceps con Barra',3,'3 series × 6-8 reps',60,'Evitar balanceo de cadera.'),
+ E('Curl Martillo con Mancuernas',2,'2-3 series al fallo',60,'Braquial y antebrazo.')]},
+{id:'d4',dow:'Viernes',t:'Tren inferior · Cadena posterior y core',ex:[
+ E('Peso Muerto Tradicional / Stiff',4,'4 series × 6-8 reps',180,'Columna neutra, empujar caderas.'),
+ E('Peso Muerto Rumano Unilateral',3,'3 series × 8-10 reps/pierna',90,'Equilibrio y glúteo medio.'),
+ E('Puente de Glúteos (Hip Thrust)',3,'3 series × 10-12 reps',90,'Bloqueo de 1s arriba apretando glúteos.'),
+ E('Curl de Piernas con Banda',3,'3 series × 12-15 reps',60,'Trabajar hasta el fallo.'),
+ E('Pallof Press con Banda',3,'3 series × 8-10 reps/lado',60,'Anti-rotación. Pausa de 2s al extender brazos sin girar el torso.')]}
+];
+DAYS.forEach(d=>d.ex.forEach((e,i)=>e.id=d.id+'e'+(i+1)));
+const ALL=DAYS.flatMap(d=>d.ex);
+const PLATES={kg:[25,20,15,10,5,2.5,1.25,0.5],lb:[45,35,25,10,5,2.5]};
+const PCOL={25:'#ff5470',45:'#ff5470',20:'#3aa0ff',35:'#3aa0ff',15:'#f5d90a',10:'#39ff88',25.1:'#ff5470',5:'#e8eef2',2.5:'#9aa7b3',1.25:'#7d8a96',.5:'#66727d'};
+
+/* ---------- ESTADO ---------- */
+const KEY='ironlog.v1';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const today=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
+function defState(){return{logs:{},meas:[],unit:'kg',auto:true,bar:20,day:'d1',inv:{kg:{25:0,20:4,15:2,10:2,5:2,2.5:2,1.25:2,.5:0},lb:{45:0,35:0,25:0,10:0,5:0,2.5:0}}}}
+let S;
+try{S=Object.assign(defState(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=defState()}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('No se pudo guardar')}};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800)}
+const dow=new Date().getDay();
+if(!localStorage.getItem(KEY)){S.day={1:'d1',2:'d2',4:'d3',5:'d4'}[dow]||'d1'}
+
+/* ---------- PWA: service worker ---------- */
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+
+/* ---------- NAVEGACIÓN ---------- */
+function go(tab){$$('section').forEach(s=>s.classList.toggle('on',s.id==='t-'+tab));$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));scrollTo(0,0);
+ if(tab==='progreso')charts();if(tab==='medidas')renderMeas();}
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.tab)};
+const U=()=>$$('.u').forEach(x=>x.textContent=S.unit);
+
+/* ---------- RUTINA ---------- */
+const getEntry=(id,create)=>{const L=S.logs[id]||(create?S.logs[id]=[]:[]);let e=L.find(x=>x.date===today());if(!e&&create){e={date:today(),sets:[]};L.push(e)}return e};
+const prevEntry=id=>{const L=(S.logs[id]||[]).filter(x=>x.date!==today()&&x.sets.some(Boolean));return L.sort((a,b)=>a.date<b.date?1:-1)[0]};
+const more={};
+function renderRoutine(){
+  $('#days').innerHTML=DAYS.map(d=>`<button data-d="${d.id}" class="${d.id===S.day?'on':''}">${d.dow.slice(0,3)}</button>`).join('');
+  const d=DAYS.find(x=>x.id===S.day);$('#dayT').textContent=d.t;$('#dayS').textContent=d.dow+' · '+d.ex.length+' ejercicios';
+  $('#exs').innerHTML=d.ex.map(e=>{
+    const t=getEntry(e.id),p=prevEntry(e.id),n=Math.max(e.s+(more[e.id]||0),t?t.sets.length:0);
+    const ps=p?p.sets.filter(Boolean).map(s=>`<b>${s.w}${s.u||S.unit}×${s.r}</b>`).join(' · '):'';
+    let rows='';for(let i=0;i<n;i++){const v=t&&t.sets[i],h=p&&(p.sets[i]||p.sets.filter(Boolean).slice(-1)[0]);
+      rows+=`<div class="set ${v?'done':''}" data-i="${i}"><span class="n">${i+1}</span>
+      <input inputmode="decimal" data-k="w" aria-label="Peso serie ${i+1}" placeholder="${h?h.w:S.unit}" value="${v?v.w:''}">
+      <input inputmode="numeric" data-k="r" aria-label="Repeticiones serie ${i+1}" placeholder="${h?h.r:'reps'}" value="${v?v.r:''}">
+      <button class="ok" aria-label="Guardar serie ${i+1}">✓</button></div>`}
+    return `<div class="card ex" data-e="${e.id}"><h3>${e.n}</h3><div class="tg">${e.tg} · descanso ${e.r>=120?e.r/60+'m':e.r+'s'}</div><div class="note">${e.note}</div>
+    <div class="prev">${p?`Sesión anterior (${p.date.split('-').reverse().join('/')}): ${ps}`:'Sin marcas anteriores todavía'}</div>
+    <div class="grid2" style="grid-template-columns:26px 1fr 1fr 44px;gap:8px"><span></span><p class="lbl">Peso (${S.unit})</p><p class="lbl">Reps</p><span></span></div>
+    ${rows}
+    <div class="chips"><button class="ghost" data-add>+ serie</button><span style="flex:1"></span>
+    <button class="chip" data-t="60">60s</button><button class="chip" data-t="90">90s</button><button class="chip" data-t="120">2m</button><button class="chip" data-t="180">3m</button></div></div>`}).join('');
+}
+function saveSet(card,row,silent){
+  const id=card.dataset.e,i=+row.dataset.i,w=row.querySelector('[data-k=w]').value.replace(',','.'),r=row.querySelector('[data-k=r]').value;
+  if(w===''||r===''||isNaN(w)||isNaN(r)){if(!silent)toast('Completa peso y reps');return false}
+  const en=getEntry(id,true);en.sets[i]={w:+w,r:+r,u:S.unit};save();row.classList.add('done');return true}
+$('#exs').addEventListener('click',e=>{
+  const card=e.target.closest('.ex');if(!card)return;
+  if(e.target.closest('.ok')){const row=e.target.closest('.set');if(saveSet(card,row)){toast('Serie guardada');if(S.auto){const ex=ALL.find(x=>x.id===card.dataset.e);startTimer(ex.r)}}}
+  else if(e.target.dataset.add!==undefined){more[card.dataset.e]=(more[card.dataset.e]||0)+1;keepScroll(renderRoutine)}
+});
+$('#exs').addEventListener('input',e=>{const r=e.target.closest('.set');if(r)r.classList.remove('done')});
+function keepScroll(f){const y=scrollY;f();scrollTo(0,y)}
+$('#days').onclick=e=>{const b=e.target.closest('button');if(b){S.day=b.dataset.d;save();renderRoutine();scrollTo(0,0)}};
+$('#saveAll').onclick=()=>{let n=0;$$('.ex').forEach(c=>c.querySelectorAll('.set').forEach(r=>{if(saveSet(c,r,true))n++}));toast(n?n+' series guardadas':'No hay series para guardar');renderRoutine()};
+
+/* ---------- CRONÓMETRO + SONIDO ---------- */
+let ac,tEnd=0,tInt;
+function audio(){if(!ac){const A=window.AudioContext||window.webkitAudioContext;if(A)ac=new A()}if(ac&&ac.state==='suspended')ac.resume()}
+function beep(f,at,d){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type='sine';o.connect(g);g.connect(ac.destination);
+  const t=ac.currentTime+at;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.4,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.05)}
+function startTimer(s){audio();tEnd=Date.now()+s*1000;$('#timer').className='run';clearInterval(tInt);tInt=setInterval(tick,200);tick()}
+function tick(){const l=Math.ceil((tEnd-Date.now())/1000);
+  if(l<=0){clearInterval(tInt);$('#tm').textContent='0:00';$('#timer').className='end';[880,880,1175].forEach((f,i)=>beep(f,i*.25,.2));if(navigator.vibrate)navigator.vibrate([200,100,200,100,300]);return}
+  $('#tm').textContent=Math.floor(l/60)+':'+String(l%60).padStart(2,'0')}
+$('#timer').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='tStop'){clearInterval(tInt);$('#tm').textContent='0:00';$('#timer').className=''}else if(b.dataset.t)startTimer(+b.dataset.t)});
+$('#exs').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b&&b.dataset.t)startTimer(+b.dataset.t)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&$('#timer').classList.contains('run'))tick()});
+
+/* ---------- MEDIDAS ---------- */
+const MK=['p','c','b','m'],MN={p:'Peso',c:'Cintura',b:'Panza',m:'Muslos'};
+$('#mDate').value=today();
+$('#mSave').onclick=()=>{
+  const v={p:$('#mP').value,c:$('#mC').value,b:$('#mB').value,m:$('#mM').value},o={date:$('#mDate').value||today(),u:S.unit};let any=false;
+  MK.forEach(k=>{const n=parseFloat(String(v[k]).replace(',','.'));if(!isNaN(n)){o[k]=n;any=true}});
+  if(!any)return toast('Ingresa al menos una medida');
+  const i=S.meas.findIndex(x=>x.date===o.date);if(i>=0)S.meas[i]=Object.assign(S.meas[i],o);else S.meas.push(o);
+  S.meas.sort((a,b)=>a.date<b.date?-1:1);save();['#mP','#mC','#mB','#mM'].forEach(s=>$(s).value='');renderMeas();toast('Medidas guardadas')};
+function renderMeas(){
+  $('#mList').innerHTML=S.meas.length?[...S.meas].reverse().map(m=>`<div class="row"><div><b>${m.date.split('-').reverse().join('/')}</b><br><small>${MK.filter(k=>m[k]!=null).map(k=>MN[k]+' '+m[k]+(k==='p'?' '+(m.u||S.unit):' cm')).join(' · ')}</small></div><button class="x" data-d="${m.date}" aria-label="Borrar">✕</button></div>`).join(''):'<p class="sub">Aún no hay registros. Guarda tu primera medida arriba.</p>'}
+$('#mList').onclick=e=>{const b=e.target.closest('[data-d]');if(b&&confirm('¿Borrar este registro?')){S.meas=S.meas.filter(m=>m.date!==b.dataset.d);save();renderMeas()}};
+
+/* ---------- GRÁFICOS ---------- */
+let cS,cM;
+$('#pEx').innerHTML=DAYS.map(d=>`<optgroup label="${d.dow} · ${d.t}">${d.ex.map(e=>`<option value="${e.id}">${e.n}</option>`).join('')}</optgroup>`).join('');
+const opt=(c)=>({responsive:true,maintainAspectRatio:true,aspectRatio:1.3,plugins:{legend:{labels:{color:'#8593a0',boxWidth:10}}},scales:{x:{ticks:{color:'#8593a0',maxTicksLimit:6},grid:{color:'#1e262d'}},y:{ticks:{color:'#8593a0'},grid:{color:'#1e262d'}}},elements:{line:{tension:.3,borderWidth:2.5},point:{radius:3.5}}});
+function charts(){
+  if(typeof Chart==='undefined'){$('#chartMsg').textContent='Chart.js no se pudo cargar. Conéctate a internet una vez para ver los gráficos.';return}
+  $('#chartMsg').textContent='';
+  const L=(S.logs[$('#pEx').value]||[]).filter(x=>x.sets.some(Boolean)).sort((a,b)=>a.date<b.date?-1:1);
+  const lab=L.map(x=>x.date.slice(5).split('-').reverse().join('/')),top=L.map(x=>Math.max(...x.sets.filter(Boolean).map(s=>s.w)));
+  const e1=L.map(x=>+Math.max(...x.sets.filter(Boolean).map(s=>s.w*(1+s.r/30))).toFixed(1));
+  cS&&cS.destroy();cS=new Chart($('#cS'),{type:'line',data:{labels:lab,datasets:[{label:'1RM estimado',data:e1,borderColor:'#39ff88',backgroundColor:'#39ff88'},{label:'Peso máx.',data:top,borderColor:'#3aa0ff',backgroundColor:'#3aa0ff'}]},options:opt()});
+  const k=$('#pM').value,M=S.meas.filter(m=>m[k]!=null);
+  cM&&cM.destroy();cM=new Chart($('#cM'),{type:'line',data:{labels:M.map(m=>m.date.slice(5).split('-').reverse().join('/')),datasets:[{label:MN[k]+(k==='p'?' ('+S.unit+')':' (cm)'),data:M.map(m=>m[k]),borderColor:'#39ff88',backgroundColor:'#39ff88'}]},options:opt()});
+}
+$('#pEx').onchange=$('#pM').onchange=charts;
+
+/* ---------- DISCOS ---------- */
+function renderInv(){
+  $('#inv').innerHTML=PLATES[S.unit].map(p=>`<div><p class="lbl">Discos de ${p} ${S.unit}</p><input inputmode="numeric" data-p="${p}" value="${S.inv[S.unit][p]??0}"></div>`).join('');
+  $('#dB').value=S.bar}
+$('#inv').oninput=e=>{const p=e.target.dataset.p;if(p){S.inv[S.unit][p]=Math.max(0,parseInt(e.target.value)||0);save()}};
+$('#dB').oninput=e=>{S.bar=parseFloat(e.target.value.replace(',','.'))||0;save()};
+$('#dGo').onclick=()=>{
+  const T=parseFloat($('#dT').value.replace(',','.')),B=parseFloat($('#dB').value.replace(',','.'))||0,o=$('#dOut');
+  if(isNaN(T))return toast('Ingresa el peso objetivo');
+  if(T<B){o.innerHTML=`<p class="sub" style="margin-top:12px">El objetivo es menor que la barra (${B} ${S.unit}).</p>`;return}
+  let rem=(T-B)/2;const used=[];
+  PLATES[S.unit].forEach(p=>{const av=Math.floor((S.inv[S.unit][p]||0)/2);let n=Math.min(av,Math.floor((rem+1e-9)/p));if(n>0){used.push([p,n]);rem-=n*p}});
+  rem=Math.round(rem*100)/100;const done=+(T-rem*2).toFixed(2);
+  const bars=used.flatMap(([p,n])=>Array(n).fill(p)).map(p=>`<div class="pl" style="height:${28+Math.min(p,S.unit==='kg'?25:45)/(S.unit==='kg'?25:45)*42}px;background:${PCOL[p]||'#9aa7b3'}">${p}</div>`).join('');
+  o.innerHTML=`<div class="bar"><div class="sh"></div>${bars||''}<div class="sh" style="width:30px"></div></div>
+  <h2>Por lado: ${used.length?used.map(([p,n])=>n+' × '+p).join(' + '):'solo la barra'}</h2>
+  <p class="sub" style="margin:0">Total cargado: <b style="color:var(--g)">${done} ${S.unit}</b>${rem>0?` · <span style="color:#ff5470">Faltan ${(rem*2).toFixed(2)} ${S.unit}: tu inventario no alcanza para el objetivo.</span>`:''}</p>`};
+
+/* ---------- AJUSTES ---------- */
+$('#sU').value=S.unit;$('#sAuto').checked=S.auto;
+$('#sU').onchange=e=>{S.unit=e.target.value;save();U();renderInv();renderRoutine();$('#dOut').innerHTML='';if(S.unit==='lb'&&S.bar===20){S.bar=45}else if(S.unit==='kg'&&S.bar===45){S.bar=20}renderInv();save()};
+$('#sAuto').onchange=e=>{S.auto=e.target.checked;save()};
+$('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({app:'ironlog',version:1,exported:new Date().toISOString(),data:S},null,1)],{type:'application/json'}));a.download='ironlog-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();toast('Copia exportada')};
+$('#impB').onclick=()=>$('#imp').click();
+$('#imp').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const j=JSON.parse(r.result),d=j.data||j;if(!d.logs||!Array.isArray(d.meas))throw 0;if(!confirm('Esto reemplazará tus datos actuales. ¿Continuar?'))return;S=Object.assign(defState(),d);save();location.reload()}catch(x){toast('Archivo no válido')}};
+  r.readAsText(f);e.target.value=''};
+$('#rst').onclick=()=>{if(confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.')){localStorage.removeItem(KEY);location.reload()}};
+
+/* ---------- INIT ---------- */
+U();renderRoutine();renderMeas();renderInv();
+</script>
+</body>
+</html>
